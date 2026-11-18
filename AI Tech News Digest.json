@@ -1,0 +1,283 @@
+{
+  "name": "AI Tech News Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -576,
+        -16
+      ],
+      "id": "3bbd3cbb-473a-4cff-8902-430eb969c189",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://hn.algolia.com/api/v1/search_by_date?tags=story&hitsPerPage=50",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "a99155b9-d915-47bd-a969-56455125afab",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "hits",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        -16
+      ],
+      "id": "d33d521d-d59e-45b6-84cf-59fad1ddeeb8",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "90f374a6-0776-465d-bbcc-670fe0370f96",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "=AI",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a6254923-59c6-4918-9482-c4a97211cf8b",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "python ",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "73745853-fd06-43f6-b30f-6d84d8b377e7",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Cybersecurity",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.4,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "61c343f6-325a-4c6e-956d-288c87ca655b",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1F-lYeEOvne6JNkW7pzmmQ2P_cPXCkb0aB04HtrbLt8k",
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F-lYeEOvne6JNkW7pzmmQ2P_cPXCkb0aB04HtrbLt8k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F-lYeEOvne6JNkW7pzmmQ2P_cPXCkb0aB04HtrbLt8k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Author": "={{ $json.author }}",
+            "URL": "={{ $json.url }}",
+            "Title": "={{ $json.title }}",
+            "Date": "={{ $json.created_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Author",
+              "displayName": "Author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        -16
+      ],
+      "id": "2f6b2fdf-b0ff-486c-b097-14cadfa5a01f",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qMxXxPCT4uI7QOg9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=Daily AI, Python & Cybersecurity News Digest",
+        "message": "=<h3>{{ $json.Title }}</h3> <p><b>Author:</b> {{ $json.Author }}</p> <p><a href=\"{{ $json.URL }}\">Read Full Article</a></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "b7e0193f-8509-4e89-aeb4-098525157165",
+      "name": "Send a message",
+      "webhookId": "e15e25bb-f16c-42e0-8b65-727bd78f930d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OT8yh9HJQeaEYoaW",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "14be21ad-7486-485a-b9cf-f469ac6599c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9edb02d2dd34e455890dd35a263da0fd5ee0b65e160cd314aa6d67be5982c2d0"
+  },
+  "nodeGroups": [],
+  "id": "rHgrGi2H7RhdvKGr",
+  "tags": []
+}
